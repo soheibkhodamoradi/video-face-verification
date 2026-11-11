@@ -218,3 +218,22 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Face verification: never commit source media, face images, or model weights
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.m4v
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.webp
+*.onnx
+*.pt
+*.pth
+*.ckpt
+models/
+outputs/
