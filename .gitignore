@@ -238,3 +238,5 @@ __marimo__/
 models/
 outputs/
 videos/
+data/
+pairs.csv
