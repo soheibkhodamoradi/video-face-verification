@@ -137,3 +137,11 @@ app.py            # optional Gradio UI
 notebooks/        # Google Colab demo
 tests/            # lightweight unit tests
 ```
+
+## License
+
+The source code in this repository is released under the MIT License (see `LICENSE`).
+
+This project uses the pretrained InsightFace `buffalo_l` models, which are provided for
+non-commercial research purposes only. The models are downloaded at runtime and are not
+included in this repository. Check InsightFace's license terms before any commercial use.
