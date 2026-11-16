@@ -1,6 +1,8 @@
 # Video Face Verification
 
-A CPU-only face verification project using **RetinaFace** detection and **ArcFace** embeddings from InsightFace's pretrained `buffalo_l` model pack. Given two videos (or two still images during evaluation), it estimates whether they show the same person.
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/soheibkhodamoradi/video-face-verification/blob/main/notebooks/colab_demo.ipynb)
+
+A CPU-only face verification project using **RetinaFace/SCRFD** detection and **ArcFace** embeddings from InsightFace's pretrained `buffalo_l` model pack. Given two videos (or two still images during evaluation), it estimates whether they show the same person.
 
 No model is trained in this project. The pretrained ONNX models run with `onnxruntime` and `CPUExecutionProvider`.
 
@@ -55,6 +57,15 @@ Run `python -m face_verify.cli --help` for all options. Missing files, unreadabl
 
 > **Important:** 0.4 is only a starting value, not a universal threshold. Choose a threshold using labeled data from your own camera, population, and operating conditions.
 
+### Phone videos
+
+Phone and front-camera videos are often soft or heavily compressed even when faces are large and frontal, so the default blur threshold (`--min-blur-score 50`) may reject every frame with `No usable face found`. Lower `--min-blur-score` (for example to `10`) when working with phone footage:
+
+```bash
+python -m face_verify.cli video1.mp4 video2.mp4 \
+  --strategy mean --threshold 0.4 --every 5 --min-blur-score 10
+```
+
 ## Evaluation and threshold selection
 
 Create a CSV with the exact header `path1,path2,label`. Labels `1` and `same` mean the same person; `0` and `different` mean different people. Relative paths are resolved relative to the CSV file.
@@ -74,6 +85,8 @@ python evaluate.py pairs.csv --strategy mean --threshold 0.4 --every 5 \
   --output-dir outputs
 ```
 
+`evaluate.py` also accepts the same quality filters as the CLI (`--min-face-size`, `--min-detection-score`, `--min-blur-score`), for example `--min-blur-score 10` on phone videos.
+
 Image pairs (including LFW-style pairs) use the same detector, quality filter, alignment, and embedding code, but no frame sampling. Video pairs use the selected aggregation strategy.
 
 The script prints and saves:
@@ -87,6 +100,8 @@ The script prints and saves:
 `outputs/roc_curve.png`, `outputs/metrics.json`, and `outputs/scores.csv` are generated. Use the recommended EER threshold as a starting point; for a real application, confirm it on a separate validation/test split and choose an operating point appropriate for the acceptable FAR/FRR trade-off.
 
 ## Google Colab
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/soheibkhodamoradi/video-face-verification/blob/main/notebooks/colab_demo.ipynb)
 
 Open [`notebooks/colab_demo.ipynb`](notebooks/colab_demo.ipynb) in Colab. The notebook installs the project, prompts for two video uploads, runs verification, displays the score and decision, and shows a detected face crop from each video. Do not save personal videos or face images into the repository.
 
@@ -108,9 +123,28 @@ pytest
 
 They cover cosine similarity, normalization, aggregation strategies, threshold decisions, blur scoring, and input validation.
 
-## Results
+## Preliminary results
 
-No accuracy number is claimed here because this repository intentionally contains no personal videos or face datasets. Performance depends strongly on the evaluation data and chosen threshold. Run `evaluate.py` on your labeled pairs and report its accuracy, AUC, EER, FAR, and FRR alongside the dataset description.
+> **Note:** The numbers below come from a tiny local sanity check on **two video pairs** (one same-person pair and one different-person pair). This is **not** a formal evaluation, and **no accuracy, ROC, AUC, or EER is claimed** or has been computed yet. No personal videos, names, photos, or video frames are included in this repository.
+
+Local CPU-only run on phone front-camera videos (~3 s, 720×1280):
+
+```bash
+python -m face_verify.cli A.mp4 B.mp4 --strategy mean --threshold 0.4 --every 5 --min-blur-score 10
+```
+
+- **Same-person pair (two videos of the same person):** cosine similarity `~0.818`, decision `"same person"`, usable frames `21` and `17` (with `--every 2` and the same relaxed filters: similarity `~0.819`, `52` and `42` usable frames).
+- **Different-person pair (one video each of two different people):** cosine similarity `~-0.017`, decision `"different person"`, usable frames `21` and `14`.
+- **Default quality filters (`--min-blur-score 50`):** rejected every frame (`No usable face found`) despite large, frontal faces because phone videos are soft/compressed; setting `--min-blur-score 10` fixed it.
+
+Performance depends strongly on the evaluation data and chosen threshold. Collect a representative labeled dataset and run `evaluate.py` before drawing conclusions about accuracy, AUC, EER, FAR, or FRR.
+
+## Responsible use
+
+- **Biometric data:** Facial images, video frames, and face embeddings are sensitive biometric identifiers. Handle, store, and delete them responsibly, and never commit personal videos or face images to Git.
+- **Informed consent:** Always obtain explicit, informed consent from every person recorded before capturing or processing their video, in accordance with applicable privacy and biometric-data regulations.
+- **Not for high-stakes decisions:** This repository is a lightweight research/educational baseline and must **not** be used for high-stakes or automated decisions, including security or access control, law enforcement or legal proceedings, surveillance, or hiring and employment screening.
+- **Demographic and condition disparities:** Face detection and recognition models can show different false-acceptance and false-rejection rates across demographic groups (such as skin tone, age, and gender presentation) and across recording conditions (camera quality, compression, lighting, pose, and occlusion).
 
 ## Limitations
 
@@ -137,6 +171,13 @@ app.py            # optional Gradio UI
 notebooks/        # Google Colab demo
 tests/            # lightweight unit tests
 ```
+
+## References
+
+- **InsightFace:** Jia Guo, Jiankang Deng, et al., *InsightFace: 2D and 3D Face Analysis Project*, <https://github.com/deepinsight/insightface>.
+- **ArcFace:** Jiankang Deng, Jia Guo, Niannan Xue, and Stefanos Zafeiriou, "ArcFace: Additive Angular Margin Loss for Deep Face Recognition," *CVPR*, 2019.
+- **RetinaFace:** Jiankang Deng, Jia Guo, Evangelos Ververas, Irene Kotsia, and Stefanos Zafeiriou, "RetinaFace: Single-Shot Multi-Level Face Localisation in the Wild," *CVPR*, 2020.
+- **SCRFD:** Jia Guo, Jiankang Deng, Alexandros Lattas, and Stefanos Zafeiriou, "Sample and Computation Redistribution for Efficient Face Detection," *ICLR*, 2022.
 
 ## License
 

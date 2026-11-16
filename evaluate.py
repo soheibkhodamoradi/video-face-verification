@@ -153,6 +153,8 @@ def save_roc_plot(
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the evaluation CLI parser, including shared quality options."""
+
     parser = argparse.ArgumentParser(
         description="Evaluate a path1,path2,label CSV containing image or video pairs."
     )

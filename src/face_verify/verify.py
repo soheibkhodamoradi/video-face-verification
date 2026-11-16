@@ -60,6 +60,9 @@ class FaceVerifier:
         if every < 1:
             raise ValueError("every must be at least 1.")
         self.every = every
+        self.min_face_size = min_face_size
+        self.min_detection_score = min_detection_score
+        self.min_blur_score = min_blur_score
         self.detector = FaceDetector(
             model_name=model_name,
             min_face_size=min_face_size,

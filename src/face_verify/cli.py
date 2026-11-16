@@ -11,11 +11,35 @@ from face_verify.verify import FaceVerifier
 def add_pipeline_arguments(parser: argparse.ArgumentParser) -> None:
     """Arguments shared by the verification and evaluation commands."""
 
-    parser.add_argument("--every", type=int, default=5, help="sample every Nth frame (default: 5)")
-    parser.add_argument("--min-face-size", type=int, default=80, help="minimum box width/height in pixels")
-    parser.add_argument("--min-detection-score", type=float, default=0.5, help="minimum detector confidence")
-    parser.add_argument("--min-blur-score", type=float, default=50.0, help="minimum variance of Laplacian")
-    parser.add_argument("--model", default="buffalo_l", help="InsightFace model pack (default: buffalo_l)")
+    parser.add_argument(
+        "--every",
+        type=int,
+        default=5,
+        help="sample every Nth frame (default: 5)",
+    )
+    parser.add_argument(
+        "--min-face-size",
+        type=int,
+        default=80,
+        help="minimum box width/height in pixels (default: 80)",
+    )
+    parser.add_argument(
+        "--min-detection-score",
+        type=float,
+        default=0.5,
+        help="minimum detector confidence (default: 0.5)",
+    )
+    parser.add_argument(
+        "--min-blur-score",
+        type=float,
+        default=50.0,
+        help="minimum variance of Laplacian (default: 50.0)",
+    )
+    parser.add_argument(
+        "--model",
+        default="buffalo_l",
+        help="InsightFace model pack (default: buffalo_l)",
+    )
 
 
 def verifier_from_args(args: argparse.Namespace) -> FaceVerifier:
